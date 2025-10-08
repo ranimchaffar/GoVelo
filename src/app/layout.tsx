@@ -1,9 +1,13 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import './globals.css';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import Navbar from '@/components/Navbar';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "GO Velo - Ride your passion!",
-  description: "Boutique de vélos et accessoires",
+  title: 'GO Velo - Accélère ta liberté !',
+  description: 'Vente en ligne de bicyclettes, pièces de rechange et accessoires pour vélos',
 };
 
 export default function RootLayout({
@@ -13,7 +17,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body>{children}</body>
+      <body className={inter.className}>
+        <Navbar />
+        <main className="pt-20">{children}</main>
+      </body>
     </html>
   );
 }
