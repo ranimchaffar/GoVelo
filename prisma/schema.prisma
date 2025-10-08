@@ -1,0 +1,120 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enum pour les rôles
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+// Enum pour statuts de commande
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  COD
+  STRIPE
+  PAYPAL
+}
+
+// Modèle Utilisateur (Admin et Clients)
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password      String   // Hasher avec bcrypt
+  name          String
+  role          Role     @default(CLIENT)
+  createdAt     DateTime @default(now())
+  
+  // Relations
+  orders        Order[]
+  cart          Cart?
+}
+
+// Modèle Produit
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  image       String
+  stock       Int      @default(0)
+  category    String   // bicyclettes, pièces, accessoires
+  isPinned    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  orderItems  OrderItem[]
+  cartItems   CartItem[]
+}
+
+// Modèle Panier (1 panier par utilisateur)
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+// Articles dans le panier
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  cartId    Int
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+  
+  @@unique([cartId, productId]) // Un produit par panier
+}
+
+// Modèle Commande
+model Order {
+  id            Int           @id @default(autoincrement())
+  orderNumber   String        @unique // Ex: ORD-2025-0001
+  
+  // Client info
+  userId        Int
+  user          User          @relation(fields: [userId], references: [id])
+  
+  // Détails commande
+  total         Float
+  paymentMethod PaymentMethod
+  status        OrderStatus   @default(PENDING)
+  
+  // Adresse livraison
+  shippingAddress String
+  shippingCity    String
+  shippingZip     String
+  phoneNumber     String
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  // Relations
+  items         OrderItem[]
+}
+
+// Articles de la commande
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float   // Prix au moment de la commande
+}
