@@ -40,7 +40,7 @@ export default async function HomePage() {
       {/* Hero Section - Bannière principale avec overlay gradient amélioré */}
       <section className="hero-section relative h-[85vh] min-h-[700px] flex items-center justify-center overflow-hidden">
         <Image
-          src="/banner.png"
+          src="/banner.jpg"
           alt="GO Velo Banner"
           fill
           className="object-cover"
